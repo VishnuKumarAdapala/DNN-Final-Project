@@ -1,0 +1,5 @@
+Metric,Baseline,Innovation,Change (%),Better when
+BLEU-4,0.0,0.0,0.0,higher
+ROUGE-L,0.05462,0.05462,0.0,higher
+Coherence,1.0,1.0,0.0,higher
+Image MSE,0.14741,0.01434,-90.27,lower

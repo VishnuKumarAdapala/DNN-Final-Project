@@ -1,0 +1,5 @@
+Config,Cross-Modal,Temp Attn,Align Loss,Best Val Loss,vs A (%)
+"A: Baseline (concat, no temp-attn)",✗,✗,✗,0.156,0.0
+B: Cross-modal fusion only,✓,✗,✗,0.1467,-6.0
+C: Temporal attention only,✗,✓,✗,0.1513,-3.0
+D: Full innovation (B+C+Align),✓,✓,✓,0.0336,-78.45
