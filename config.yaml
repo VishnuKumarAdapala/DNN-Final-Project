@@ -1,0 +1,100 @@
+# ============================================================
+# Deep Neural Networks and Learning Systems - 55-710365
+# Multimodal Sequence Modelling - config.yaml
+# ============================================================
+
+project:
+  name: "Visual Story Continuation with Cross-Modal Temporal Attention"
+  version: "1.0"
+  seed: 42
+
+dataset:
+  name: "StoryReasoning"
+  hf_path: "daniel3303/StoryReasoning"
+  max_stories: 500          # reduce for quick experiments; set null for full dataset
+  sequence_length: 3        # K frames used as input (predict K+1)
+  image_size: 224
+  max_text_length: 128
+  train_split: 0.8
+  val_split: 0.1
+  test_split: 0.1
+  num_workers: 2
+
+model:
+  # Visual Encoder (CNN)
+  visual_encoder:
+    backbone: "resnet18"    # lightweight; swap to resnet50 for more capacity
+    pretrained: true
+    feature_dim: 512
+    freeze_backbone: false
+
+  # Text Encoder (LSTM)
+  text_encoder:
+    vocab_size: 10000
+    embed_dim: 256
+    hidden_dim: 512
+    num_layers: 2
+    dropout: 0.3
+    bidirectional: true
+
+  # Multimodal Fusion
+  fusion:
+    strategy: "cross_modal_attention"  # INNOVATION: cross-modal vs simple concatenation
+    fusion_dim: 512
+    num_heads: 8
+    dropout: 0.1
+
+  # Sequence Model (LSTM over K frames)
+  sequence_model:
+    type: "lstm"            # lstm | gru | bilstm
+    hidden_dim: 512
+    num_layers: 2
+    dropout: 0.3
+
+  # Attention (Temporal Attention over sequence)
+  attention:
+    type: "temporal_cross_modal"   # INNOVATION key component
+    num_heads: 8
+    dropout: 0.1
+
+  # Decoders
+  image_decoder:
+    latent_dim: 512
+    output_size: 64         # generates 64x64 image feature map
+    use_upsampling: true
+
+  text_decoder:
+    hidden_dim: 512
+    max_gen_length: 64
+    temperature: 1.0
+
+training:
+  epochs: 30
+  batch_size: 8
+  learning_rate: 3.0e-4
+  weight_decay: 1.0e-4
+  grad_clip: 1.0
+  scheduler: "cosine"      # cosine | step | none
+  warmup_epochs: 3
+
+  # Loss weights (multi-task)
+  loss_weights:
+    image_reconstruction: 1.0
+    text_generation: 1.0
+    multimodal_alignment: 0.5   # INNOVATION: contrastive alignment loss
+
+  # Early stopping
+  patience: 7
+  monitor: "val_loss"
+
+logging:
+  log_dir: "results/"
+  save_checkpoint: true
+  checkpoint_dir: "results/checkpoints"
+  log_every_n_steps: 10
+  eval_every_n_epochs: 2
+
+explainability:
+  method: "attention_visualization"   # visualise attention maps per head
+  generate_for_n_samples: 10
+  save_dir: "results/figures/attention_maps"
